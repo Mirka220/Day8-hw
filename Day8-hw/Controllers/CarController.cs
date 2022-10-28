@@ -69,6 +69,71 @@ namespace Day8_hw.Controllers
             return NoContent();
         }
 
+        [HttpPut("Id")]
+        public async Task<ActionResult> Put(Guid Id, Car car)
+        {
+            if (Id == car.Id)
+            {
+
+                var carObject = _dbConext.Cars.FindAsync(Id);
+
+                try
+                {
+                    if (await carObject != null)
+                    {
+                        _dbConext.Entry(carObject).State = EntityState.Modified;
+                        await _dbConext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        _dbConext.Cars.Add(car);
+                    }
+
+                    await _dbConext.SaveChangesAsync();
+                }
+
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (Id != car.Id)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                }
+
+            }
+            else
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
+        [HttpPatch("Id")]
+        public async Task<ActionResult> Patch(Guid Id, Car car)
+        {
+            var carID = await _dbConext.Cars.SingleAsync(x => x.Id == Id);
+
+            carID.Id = car.Id;
+            carID.Brand = car.Brand;
+            carID.Color = car.Color;
+            carID.YearOfProduction = car.YearOfProduction;
+            carID.Price = car.Price;
+            carID.BodyType = car.BodyType;
+            carID.EngineVolume = car.EngineVolume;
+            carID.IsClearedInKazakhstan = car.IsClearedInKazakhstan;
+            carID.Comment = car.Comment;
+
+            await _dbConext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private static Car CarOut(Car car) => new Car
         {
             Id = car.Id,
